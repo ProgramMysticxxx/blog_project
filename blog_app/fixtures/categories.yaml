@@ -1,0 +1,18 @@
+- model: blog_app.Category
+  fields: 
+    name: development
+- model: blog_app.Category
+  fields: 
+    name: administration
+- model: blog_app.Category
+  fields: 
+    name: design
+- model: blog_app.Category
+  fields: 
+    name: management
+- model: blog_app.Category
+  fields: 
+    name: marketing
+- model: blog_app.Category
+  fields: 
+    name: popular_science
