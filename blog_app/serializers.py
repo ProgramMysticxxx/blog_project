@@ -47,11 +47,11 @@ class TagSerializer(serializers.ModelSerializer):
 class ArticleSerializer(serializers.ModelSerializer):
     rating = serializers.ReadOnlyField()
     ratings_count = serializers.ReadOnlyField()
-    tags = serializers.ListField(
-        child=serializers.CharField(),
-        source="tags_names",
+    tags = serializers.SlugRelatedField(
+        many=True,
+        slug_field="name",
+        queryset=Tag.objects.all(),
     )
-
     cover_url = serializers.ImageField(
         source="cover.image",
         read_only=True,

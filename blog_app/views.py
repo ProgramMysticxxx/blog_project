@@ -213,20 +213,14 @@ class ArticleViewSet(viewsets.ModelViewSet):
 
     @staticmethod
     def _create_unexistent_tags(tags):
-        for tag in tags:
-            if not Tag.objects.filter(name=tag).exists():
-                Tag.objects.create(name=tag)
+        return Tag.objects.bulk_create(tags, ignore_conflicts=True)
 
     def perform_create(self, serializer):
-        for tag in serializer.validated_data["tags"]:
-            if not Tag.objects.filter(name=tag).exists():
-                Tag.objects.create(name=tag)
+        self._create_unexistent_tags(serializer.validated_data["tags"])
         serializer.save(author=self.request.user)
 
     def perform_update(self, serializer):
-        for tag in serializer.validated_data["tags"]:
-            if not Tag.objects.filter(name=tag).exists():
-                Tag.objects.create(name=tag)
+        self._create_unexistent_tags(serializer.validated_data["tags"])
         return super().perform_update(serializer)
 
     @extend_schema(operation_id="favoriteArticle", methods=["post"])
