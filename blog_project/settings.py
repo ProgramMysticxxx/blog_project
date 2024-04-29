@@ -39,12 +39,12 @@ SPECTACULAR_SETTINGS = {
 # Application definition
 
 INSTALLED_APPS = [
+    "blog_app",
     "corsheaders",
     "drf_spectacular",
     "rest_framework.authtoken",
     "rest_framework",
     "django_filters",
-    "blog_app",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
