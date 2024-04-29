@@ -184,6 +184,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
         "author__id",
         "category__name",
         "tags__name",
+        "editor_choice",
     ]
     ordering_fields = [
         "created_at",

@@ -86,6 +86,7 @@ class Article(models.Model):
     tags = models.ManyToManyField(Tag, related_name="articles")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    editor_choice = models.BooleanField(default=False)
 
     @property
     def ratings_count(
