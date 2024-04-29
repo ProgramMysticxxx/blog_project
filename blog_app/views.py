@@ -80,7 +80,6 @@ class AuthViewSet(viewsets.ViewSet):
         request_serializer = UsernamePasswordSerializer(data=request.data)
         request_serializer.is_valid(raise_exception=True)
         request_data = request_serializer.data
-        print(request_data)
 
         user = get_object_or_404(User, username=request_data["username"])
         if not user.check_password(request_data["password"]):

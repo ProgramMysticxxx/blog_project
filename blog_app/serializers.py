@@ -11,6 +11,7 @@ from blog_app.models import (
 )
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from drf_spectacular.utils import extend_schema_field
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -42,10 +43,10 @@ class TagSerializer(serializers.ModelSerializer):
         model = Tag
         fields = "__all__"
 
-
 class ArticleSerializer(serializers.ModelSerializer):
     rating = serializers.ReadOnlyField()
     ratings_count = serializers.ReadOnlyField()
+    # FIXME is not shown in schema?!
     tags = serializers.ListField(
         child=serializers.CharField(),
         write_only=True,
@@ -53,6 +54,8 @@ class ArticleSerializer(serializers.ModelSerializer):
     cover_url = serializers.ImageField(
         source="cover.image",
         read_only=True,
+        allow_null=True,
+        required=False,
     )
     author_username = serializers.ReadOnlyField(source="author.username")
 
@@ -145,9 +148,11 @@ class UploadedFileSerializer(serializers.ModelSerializer):
             "uploaded_at",
         ]
 
+
 class UserTokenSerializer(serializers.Serializer):
     user = UserSerializer()
     token = serializers.CharField()
+
 
 class UsernamePasswordSerializer(serializers.Serializer):
     username = serializers.CharField()
