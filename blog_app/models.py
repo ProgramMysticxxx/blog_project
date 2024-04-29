@@ -99,20 +99,20 @@ class Article(models.Model):
             negative=models.Count("pk", filter=models.Q(is_positive=False)),
         )
 
-    @property
-    def rating(self) -> int:
-        return (
-            self.article_rates.aggregate(
-                rating=models.Sum(
-                    models.Case(
-                        models.When(is_positive=True, then=1),
-                        models.When(is_positive=False, then=-1),
-                        output_field=models.IntegerField(),
-                    )
-                )
-            )["rating"]
-            or 0
-        )
+    # @property
+    # def rating(self) -> int:
+    #     return (
+    #         self.article_rates.aggregate(
+    #             rating=models.Sum(
+    #                 models.Case(
+    #                     models.When(is_positive=True, then=1),
+    #                     models.When(is_positive=False, then=-1),
+    #                     output_field=models.IntegerField(),
+    #                 )
+    #             )
+    #         )["rating"]
+    #         or 0
+    #     )
     
     @property
     def tags_names(self):
@@ -181,20 +181,20 @@ class Comment(models.Model):
             negative=models.Count("pk", filter=models.Q(is_positive=False)),
         )
 
-    @property
-    def rating(self) -> int:
-        return (
-            self.comment_rates.aggregate(
-                rating=models.Sum(
-                    models.Case(
-                        models.When(is_positive=True, then=1),
-                        models.When(is_positive=False, then=-1),
-                        output_field=models.IntegerField(),
-                    )
-                )
-            )["rating"]
-            or 0
-        )
+    # @property
+    # def rating(self) -> int:
+    #     return (
+    #         self.comment_rates.aggregate(
+    #             rating=models.Sum(
+    #                 models.Case(
+    #                     models.When(is_positive=True, then=1),
+    #                     models.When(is_positive=False, then=-1),
+    #                     output_field=models.IntegerField(),
+    #                 )
+    #             )
+    #         )["rating"]
+    #         or 0
+    #     )
 
     def __str__(self):
         return f'"{self.content}" by {self.user}'

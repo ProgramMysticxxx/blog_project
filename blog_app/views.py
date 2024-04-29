@@ -43,6 +43,7 @@ from drf_spectacular.utils import (
 from drf_spectacular.types import OpenApiTypes
 from rest_framework import parsers
 from drf_spectacular.authentication import TokenScheme
+from django.db import models
 
 
 @extend_schema(tags=["Auth"])
@@ -160,7 +161,16 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     destroy=extend_schema(operation_id="deleteArticle"),
 )
 class ArticleViewSet(viewsets.ModelViewSet):
-    queryset = Article.objects.all()
+    queryset = Article.objects.all().annotate(
+        rating=models.Sum(
+            models.Case(
+                models.When(article_rates__is_positive=True, then=1),
+                models.When(article_rates__is_positive=False, then=-1),
+                default=0,
+                output_field=models.IntegerField(),
+            )
+        )
+    )
     serializer_class = ArticleSerializer
     filter_backends = [
         filters.SearchFilter,
@@ -209,6 +219,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(
                 author__profile__subscribers__user=self.request.user
             )
+
         return queryset
 
     @staticmethod
@@ -270,13 +281,27 @@ class ArticleViewSet(viewsets.ModelViewSet):
     destroy=extend_schema(operation_id="deleteComment"),
 )
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
+    queryset = Comment.objects.all().annotate(
+        rating=models.Sum(
+            models.Case(
+                models.When(comment_rates__is_positive=True, then=1),
+                models.When(comment_rates__is_positive=False, then=-1),
+                default=0,
+                output_field=models.IntegerField(),
+            )
+        )
+    )
     serializer_class = CommentSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = [
         "article__id",
         "author__id",
         "reply_to__id",
+    ]
+    ordering_fields = [
+        "created_at",
+        "updated_at",
+        "rating",
     ]
     permission_classes = [CommentPermission]
 
