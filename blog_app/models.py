@@ -222,7 +222,6 @@ class CommentRate(models.Model):
     #         f'{self.user} {'liked' if self.is_positive else 'disliked'} "{self.comment}"'
     #     )
 
-
 class ArticleFavorite(models.Model):
     user = models.ForeignKey(
         User,
