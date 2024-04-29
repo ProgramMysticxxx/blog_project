@@ -113,6 +113,10 @@ class Article(models.Model):
             )["rating"]
             or 0
         )
+    
+    @property
+    def tags_names(self):
+        return self.tags.values_list("name", flat=True)
 
     def __str__(self):
         return f'"{self.title}" by {self.author}'

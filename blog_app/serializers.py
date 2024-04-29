@@ -43,14 +43,15 @@ class TagSerializer(serializers.ModelSerializer):
         model = Tag
         fields = "__all__"
 
+
 class ArticleSerializer(serializers.ModelSerializer):
     rating = serializers.ReadOnlyField()
     ratings_count = serializers.ReadOnlyField()
-    # FIXME is not shown in schema?!
     tags = serializers.ListField(
         child=serializers.CharField(),
-        write_only=True,
+        source="tags_names",
     )
+
     cover_url = serializers.ImageField(
         source="cover.image",
         read_only=True,
@@ -67,11 +68,6 @@ class ArticleSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation["tags"] = instance.tags.values_list("name", flat=True)
-        return representation
 
 
 class CommentSerializer(serializers.ModelSerializer):
