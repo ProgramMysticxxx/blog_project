@@ -59,6 +59,35 @@ class ArticleSerializer(serializers.ModelSerializer):
         required=False,
     )
     author_username = serializers.ReadOnlyField(source="author.username")
+    author_avatar_url = serializers.ImageField(
+        source="author.profile.avatar.image",
+        read_only=True,
+    )
+
+    your_rate = serializers.SerializerMethodField()
+
+    # FIXME temporary solution
+    def to_internal_value(self, data):
+        for tag in data.get("tags"):
+            if not Tag.objects.filter(name=tag).exists():
+                Tag.objects.create(name=tag)
+        return super().to_internal_value(data)
+
+    def get_your_rate(self, obj):
+        user = self.context.get("request").user
+        if user.is_authenticated:
+            rate = obj.article_rates.filter(user=user).first()
+            if rate:
+                return rate.is_positive
+        return None
+
+    is_your_bookmark = serializers.SerializerMethodField()
+
+    def get_is_your_bookmark(self, obj):
+        user = self.context.get("request").user
+        if user.is_authenticated:
+            return obj.favors.filter(user=user).exists()
+        return False
 
     class Meta:
         model = Article
@@ -74,14 +103,16 @@ class CommentSerializer(serializers.ModelSerializer):
     rating = serializers.ReadOnlyField()
     ratings_count = serializers.ReadOnlyField()
     author_username = serializers.ReadOnlyField(source="author.username")
+    author_avatar_url = serializers.ImageField(
+        source="author.profile.avatar.image",
+        read_only=True,
+    )
 
     class Meta:
         model = Comment
         fields = "__all__"
         read_only_fields = [
-            "article",
             "author",
-            "reply_to",
             "created_at",
             "updated_at",
         ]
@@ -109,6 +140,21 @@ class ProfileSerializer(serializers.ModelSerializer):
         read_only=True,
     )
     total_articles_rating = serializers.ReadOnlyField()
+    date_joined = serializers.ReadOnlyField(source="user.date_joined")
+    is_staff = serializers.ReadOnlyField(source="user.is_staff")
+    is_you = serializers.SerializerMethodField()
+
+    def get_is_you(self, obj) -> bool:
+        request = self.context.get("request")
+        return request.user == obj.user
+
+    are_you_subscribed = serializers.SerializerMethodField()
+
+    def get_are_you_subscribed(self, obj) -> bool:
+        request = self.context.get("request")
+        if request.user.is_authenticated:
+            return obj.subscribers.filter(user=request.user).exists()
+        return False
 
     class Meta:
         model = Profile
@@ -121,6 +167,10 @@ class ProfileSerializer(serializers.ModelSerializer):
             "articles_count",
             "subscribers_count",
             "total_articles_rating",
+            "date_joined",
+            "is_staff",
+            "is_you",
+            "are_you_subscribed",
         ]
         read_only_fields = ["username"]
 

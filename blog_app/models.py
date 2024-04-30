@@ -162,6 +162,7 @@ class Comment(models.Model):
         "self",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
         related_name="replies",
     )
     content = models.TextField()
@@ -198,7 +199,7 @@ class Comment(models.Model):
     #     )
 
     def __str__(self):
-        return f'"{self.content}" by {self.user}'
+        return f'"{self.content}" by {self.author}'
 
 
 class CommentRate(models.Model):

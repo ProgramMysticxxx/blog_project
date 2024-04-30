@@ -172,6 +172,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
         )
     )
     serializer_class = ArticleSerializer
+    # parser_classes = [parsers.JSONParser]
     filter_backends = [
         filters.SearchFilter,
         filters.OrderingFilter,
@@ -263,6 +264,12 @@ class ArticleViewSet(viewsets.ModelViewSet):
         article = self.get_object()
         user = request.user
         if request.method == "POST":
+            oldRate = ArticleRate.objects.filter(
+                user=user,
+                article=article,
+            )
+            if oldRate.exists():
+                oldRate.delete()
             serializer = ArticleRateSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save(user=user, article=article)
@@ -293,7 +300,10 @@ class CommentViewSet(viewsets.ModelViewSet):
         )
     )
     serializer_class = CommentSerializer
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+    ]
     filterset_fields = [
         "article__id",
         "author__id",
@@ -305,6 +315,9 @@ class CommentViewSet(viewsets.ModelViewSet):
         "rating",
     ]
     permission_classes = [CommentPermission]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
     @extend_schema(operation_id="favoriteComment", methods=["post"])
     @extend_schema(operation_id="unfavoriteComment", methods=["delete"])
