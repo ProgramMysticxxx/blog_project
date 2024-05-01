@@ -65,6 +65,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     )
 
     your_rate = serializers.SerializerMethodField()
+    you_author = serializers.SerializerMethodField()
 
     # FIXME temporary solution
     def to_internal_value(self, data):
@@ -79,6 +80,12 @@ class ArticleSerializer(serializers.ModelSerializer):
             rate = obj.article_rates.filter(user=user).first()
             if rate:
                 return rate.is_positive
+        return None
+    
+    def get_you_author(self, obj):
+        user = self.context.get("request").user
+        if user.is_authenticated:
+            return obj.author == user
         return None
 
     is_your_bookmark = serializers.SerializerMethodField()
