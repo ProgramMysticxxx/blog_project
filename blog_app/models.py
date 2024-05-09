@@ -63,7 +63,27 @@ class Tag(models.Model):
         return f"#{self.name}"
 
 
+class ArticleManager(models.Manager):
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                rating=models.Sum(
+                    models.Case(
+                        models.When(article_rates__is_positive=True, then=1),
+                        models.When(article_rates__is_positive=False, then=-1),
+                        default=0,
+                        output_field=models.IntegerField(),
+                    )
+                )
+            )
+        )
+
+
 class Article(models.Model):
+    objects = ArticleManager()
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -114,7 +134,7 @@ class Article(models.Model):
     #         )["rating"]
     #         or 0
     #     )
-    
+
     @property
     def tags_names(self):
         return self.tags.values_list("name", flat=True)
@@ -146,7 +166,27 @@ class ArticleRate(models.Model):
         )
 
 
+class CommentManager(models.Manager):
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                rating=models.Sum(
+                    models.Case(
+                        models.When(comment_rates__is_positive=True, then=1),
+                        models.When(comment_rates__is_positive=False, then=-1),
+                        default=0,
+                        output_field=models.IntegerField(),
+                    )
+                )
+            )
+        )
+
+
 class Comment(models.Model):
+    objects = CommentManager()
     author = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -223,6 +263,7 @@ class CommentRate(models.Model):
     #     return (
     #         f'{self.user} {'liked' if self.is_positive else 'disliked'} "{self.comment}"'
     #     )
+
 
 class ArticleFavorite(models.Model):
     user = models.ForeignKey(

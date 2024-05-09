@@ -45,7 +45,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class ArticleSerializer(serializers.ModelSerializer):
-    rating = serializers.ReadOnlyField()
+    rating = serializers.IntegerField(read_only=True)
     ratings_count = serializers.ReadOnlyField()
     tags = serializers.SlugRelatedField(
         many=True,
@@ -74,7 +74,7 @@ class ArticleSerializer(serializers.ModelSerializer):
                 Tag.objects.create(name=tag)
         return super().to_internal_value(data)
 
-    def get_your_rate(self, obj):
+    def get_your_rate(self, obj) -> bool | None:
         user = self.context.get("request").user
         if user.is_authenticated:
             rate = obj.article_rates.filter(user=user).first()
@@ -82,7 +82,7 @@ class ArticleSerializer(serializers.ModelSerializer):
                 return rate.is_positive
         return None
     
-    def get_you_author(self, obj):
+    def get_you_author(self, obj) -> bool | None:
         user = self.context.get("request").user
         if user.is_authenticated:
             return obj.author == user
@@ -90,11 +90,11 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     is_your_bookmark = serializers.SerializerMethodField()
 
-    def get_is_your_bookmark(self, obj):
+    def get_is_your_bookmark(self, obj) -> bool | None:
         user = self.context.get("request").user
         if user.is_authenticated:
             return obj.favors.filter(user=user).exists()
-        return False
+        return None
 
     class Meta:
         model = Article
@@ -107,7 +107,7 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    rating = serializers.ReadOnlyField()
+    rating = serializers.IntegerField(read_only=True)
     ratings_count = serializers.ReadOnlyField()
     author_username = serializers.ReadOnlyField(source="author.username")
     author_avatar_url = serializers.ImageField(

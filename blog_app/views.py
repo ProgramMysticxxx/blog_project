@@ -161,16 +161,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     destroy=extend_schema(operation_id="deleteArticle"),
 )
 class ArticleViewSet(viewsets.ModelViewSet):
-    queryset = Article.objects.all().annotate(
-        rating=models.Sum(
-            models.Case(
-                models.When(article_rates__is_positive=True, then=1),
-                models.When(article_rates__is_positive=False, then=-1),
-                default=0,
-                output_field=models.IntegerField(),
-            )
-        )
-    )
+    queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     # parser_classes = [parsers.JSONParser]
     filter_backends = [
@@ -289,16 +280,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
     destroy=extend_schema(operation_id="deleteComment"),
 )
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all().annotate(
-        rating=models.Sum(
-            models.Case(
-                models.When(comment_rates__is_positive=True, then=1),
-                models.When(comment_rates__is_positive=False, then=-1),
-                default=0,
-                output_field=models.IntegerField(),
-            )
-        )
-    )
+    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     filter_backends = [
         DjangoFilterBackend,
