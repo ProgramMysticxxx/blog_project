@@ -42,6 +42,8 @@ class ProfilePermission(permissions.BasePermission):
                 and request.user.is_authenticated
                 and request.query_params.get("subscribed") is not None
             )
+        elif view.action == "update" or view.action == "partial_update":
+            return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
