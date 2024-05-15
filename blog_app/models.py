@@ -103,7 +103,11 @@ class Article(models.Model):
         null=True,
         related_name="articles",
     )
-    tags = models.ManyToManyField(Tag, related_name="articles")
+    tags = models.ManyToManyField(
+        Tag,
+        related_name="articles",
+        blank=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     editor_choice = models.BooleanField(default=False)
