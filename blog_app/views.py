@@ -330,7 +330,18 @@ class CommentViewSet(viewsets.ModelViewSet):
 @extend_schema(tags=["Profiles"])
 @extend_schema_view(
     list=extend_schema(operation_id="getProfiles"),
-    retrieve=extend_schema(operation_id="getProfile"),
+    retrieve=extend_schema(
+        operation_id="getProfile",
+        parameters=[
+            OpenApiParameter(
+                "include_email",
+                OpenApiTypes.BOOL,
+                OpenApiParameter.QUERY,
+                default=None,
+                description="Whether to include email in the response. The requester must be the owner of the profile.",
+            ),
+        ],
+    ),
     create=extend_schema(operation_id="createProfile"),
     update=extend_schema(operation_id="updateProfile"),
     partial_update=extend_schema(operation_id="partialUpdateProfile"),

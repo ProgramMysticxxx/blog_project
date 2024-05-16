@@ -55,6 +55,15 @@ class ProfileSerializer(serializers.ModelSerializer):
     date_joined = serializers.ReadOnlyField(source="user.date_joined")
     is_staff = serializers.ReadOnlyField(source="user.is_staff")
     is_you = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
+
+    def get_email(self, obj) -> str | None:
+        request = self.context.get("request")
+        if (
+            request.query_params.get("include_email")
+            and obj.user == request.user
+        ):
+            return obj.user.email
 
     def get_is_you(self, obj) -> bool:
         request = self.context.get("request")
@@ -76,6 +85,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "avatar",
             "avatar_url",
             "bio",
+            "email",
             "articles_count",
             "subscribers_count",
             "total_articles_rating",
@@ -176,7 +186,7 @@ class CommentSerializer(serializers.ModelSerializer):
     def get_is_your_comment(self, obj) -> bool | None:
         user = self.context.get("request").user
         return obj.author == user
-    
+
     def get_your_rate(self, obj) -> bool | None:
         user = self.context.get("request").user
         if user.is_authenticated:
