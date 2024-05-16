@@ -90,6 +90,8 @@ class ArticleRateAdmin(admin.ModelAdmin):
 
     search_fields = ["article__title", "user__username"]
 
+    list_filter = ("user", "article")
+
     def article(self, obj):
         return obj.article.title
 
@@ -106,11 +108,23 @@ class CommentAdmin(admin.ModelAdmin):
         "updated_at",
     )
 
-    search_fields = ["article__title", "author__username"]
+    search_fields = [
+        "content",
+        "article__title",
+        "author__username",
+    ]
+
+    list_filter = (
+        "author",
+        "article",
+        "reply_to",
+    )
+
+    date_hierarchy = "updated_at"
 
     def article(self, obj):
         return obj.article.title
-    
+
     def replies(self, obj):
         return obj.replies.count()
 
@@ -120,6 +134,8 @@ class CommentRateAdmin(admin.ModelAdmin):
     list_display = ("comment", "user", "is_positive")
 
     search_fields = ["comment__content", "user__username"]
+
+    list_filter = ("user", "comment")
 
     def comment(self, obj):
         return obj.comment.content
@@ -134,6 +150,12 @@ class UploadedImageAdmin(admin.ModelAdmin):
         "uploaded_at",
     )
 
+    list_filter = ("user",)
+
+    search_fields = ["user__username", "image"]
+
+    date_hierarchy = "uploaded_at"
+
 
 @admin.register(UploadedFile)
 class UploadedFileAdmin(admin.ModelAdmin):
@@ -144,10 +166,22 @@ class UploadedFileAdmin(admin.ModelAdmin):
         "uploaded_at",
     )
 
+    list_filter = ("user",)
+
+    search_fields = ["user__username", "file"]
+
+    date_hierarchy = "uploaded_at"
+
 
 @admin.register(ArticleFavorite)
 class ArticleFavoriteAdmin(admin.ModelAdmin):
     list_display = ("user", "article", "favored_at")
+
+    search_fields = ["user__username", "article__title"]
+
+    list_filter = ["user", "article"]
+
+    date_hierarchy = "favored_at"
 
 
 @admin.register(Profile)
@@ -165,6 +199,8 @@ class ProfileAdmin(admin.ModelAdmin):
 
     search_fields = ["username", "public_name", "user__username", "bio"]
 
+    date_hierarchy = "user__date_joined"
+
     def has_avatar(self, obj):
         return obj.avatar is not None
 
@@ -177,6 +213,10 @@ class ProfileSubscriptionAdmin(admin.ModelAdmin):
     list_display = ("user", "subscribed_to", "subscribed_at")
 
     search_fields = ["user__username", "profile__username"]
+
+    date_hierarchy = "subscribed_at"
+
+    list_filter = ("user", "profile")
 
     def subscribed_to(self, obj):
         return obj.profile.username
