@@ -63,6 +63,9 @@ class ArticleSerializer(serializers.ModelSerializer):
         source="author.profile.avatar.image",
         read_only=True,
     )
+    author_date_joined = serializers.ReadOnlyField(source="author.date_joined")
+    author_bio = serializers.ReadOnlyField(source="author.profile.bio")
+    author_public_name = serializers.ReadOnlyField(source="author.profile.public_name")
 
     your_rate = serializers.SerializerMethodField()
     you_author = serializers.SerializerMethodField()
@@ -81,7 +84,7 @@ class ArticleSerializer(serializers.ModelSerializer):
             if rate:
                 return rate.is_positive
         return None
-    
+
     def get_you_author(self, obj) -> bool | None:
         user = self.context.get("request").user
         if user.is_authenticated:
