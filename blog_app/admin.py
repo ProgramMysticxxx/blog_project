@@ -39,7 +39,7 @@ class ArticleAdmin(admin.ModelAdmin):
 
     date_hierarchy = "created_at"
 
-    list_filter = ("category", "tags", "editor_choice")
+    list_filter = ("author", "category", "tags", "editor_choice")
 
     search_fields = [
         "title",
