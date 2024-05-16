@@ -43,6 +43,47 @@ class TagSerializer(serializers.ModelSerializer):
         model = Tag
         fields = "__all__"
 
+class ProfileSerializer(serializers.ModelSerializer):
+    articles_count = serializers.ReadOnlyField()
+    subscribers_count = serializers.ReadOnlyField()
+    avatar_url = serializers.ImageField(
+        source="avatar.image",
+        read_only=True,
+    )
+    total_articles_rating = serializers.ReadOnlyField()
+    date_joined = serializers.ReadOnlyField(source="user.date_joined")
+    is_staff = serializers.ReadOnlyField(source="user.is_staff")
+    is_you = serializers.SerializerMethodField()
+
+    def get_is_you(self, obj) -> bool:
+        request = self.context.get("request")
+        return request.user == obj.user
+
+    are_you_subscribed = serializers.SerializerMethodField()
+
+    def get_are_you_subscribed(self, obj) -> bool:
+        request = self.context.get("request")
+        if request.user.is_authenticated:
+            return obj.subscribers.filter(user=request.user).exists()
+        return False
+
+    class Meta:
+        model = Profile
+        fields = [
+            "username",
+            "public_name",
+            "avatar",
+            "avatar_url",
+            "bio",
+            "articles_count",
+            "subscribers_count",
+            "total_articles_rating",
+            "date_joined",
+            "is_staff",
+            "is_you",
+            "are_you_subscribed",
+        ]
+        read_only_fields = ["username"]
 
 class ArticleSerializer(serializers.ModelSerializer):
     rating = serializers.IntegerField(read_only=True)
@@ -58,14 +99,17 @@ class ArticleSerializer(serializers.ModelSerializer):
         allow_null=True,
         required=False,
     )
-    author_username = serializers.ReadOnlyField(source="author.username")
-    author_avatar_url = serializers.ImageField(
-        source="author.profile.avatar.image",
-        read_only=True,
-    )
-    author_date_joined = serializers.ReadOnlyField(source="author.date_joined")
-    author_bio = serializers.ReadOnlyField(source="author.profile.bio")
-    author_public_name = serializers.ReadOnlyField(source="author.profile.public_name")
+    # author_username = serializers.ReadOnlyField(source="author.username")
+    # author_avatar_url = serializers.ImageField(
+    #     source="author.profile.avatar.image",
+    #     read_only=True,
+    # )
+    # author_date_joined = serializers.ReadOnlyField(source="author.date_joined")
+    # author_bio = serializers.ReadOnlyField(source="author.profile.bio")
+    # author_public_name = serializers.ReadOnlyField(source="author.profile.public_name")
+    # author_rating = serializers.ReadOnlyField(source="author.profile.rating")
+    # author_subscribers_count = serializers.ReadOnlyField(source="author.profile.subscribers_count")
+    author_details = ProfileSerializer(source="author.profile")
 
     your_rate = serializers.SerializerMethodField()
     you_author = serializers.SerializerMethodField()
@@ -112,11 +156,12 @@ class ArticleSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     rating = serializers.IntegerField(read_only=True)
     ratings_count = serializers.ReadOnlyField()
-    author_username = serializers.ReadOnlyField(source="author.username")
-    author_avatar_url = serializers.ImageField(
-        source="author.profile.avatar.image",
-        read_only=True,
-    )
+    # author_username = serializers.ReadOnlyField(source="author.username")
+    # author_avatar_url = serializers.ImageField(
+    #     source="author.profile.avatar.image",
+    #     read_only=True,
+    # )
+    author_details = ProfileSerializer(source="author.profile")
 
     class Meta:
         model = Comment
@@ -140,49 +185,6 @@ class CommentRateSerializer(serializers.ModelSerializer):
         model = CommentRate
         fields = "__all__"
         read_only_fields = ["user", "comment", "rated_at"]
-
-
-class ProfileSerializer(serializers.ModelSerializer):
-    articles_count = serializers.ReadOnlyField()
-    subscribers_count = serializers.ReadOnlyField()
-    avatar_url = serializers.ImageField(
-        source="avatar.image",
-        read_only=True,
-    )
-    total_articles_rating = serializers.ReadOnlyField()
-    date_joined = serializers.ReadOnlyField(source="user.date_joined")
-    is_staff = serializers.ReadOnlyField(source="user.is_staff")
-    is_you = serializers.SerializerMethodField()
-
-    def get_is_you(self, obj) -> bool:
-        request = self.context.get("request")
-        return request.user == obj.user
-
-    are_you_subscribed = serializers.SerializerMethodField()
-
-    def get_are_you_subscribed(self, obj) -> bool:
-        request = self.context.get("request")
-        if request.user.is_authenticated:
-            return obj.subscribers.filter(user=request.user).exists()
-        return False
-
-    class Meta:
-        model = Profile
-        fields = [
-            "username",
-            "public_name",
-            "avatar",
-            "avatar_url",
-            "bio",
-            "articles_count",
-            "subscribers_count",
-            "total_articles_rating",
-            "date_joined",
-            "is_staff",
-            "is_you",
-            "are_you_subscribed",
-        ]
-        read_only_fields = ["username"]
 
 
 class UploadedImageSerializer(serializers.ModelSerializer):
