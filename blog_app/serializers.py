@@ -171,10 +171,19 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only=True,
     )
     is_your_comment = serializers.SerializerMethodField()
+    your_rate = serializers.SerializerMethodField()
 
     def get_is_your_comment(self, obj) -> bool | None:
         user = self.context.get("request").user
         return obj.author == user
+    
+    def get_your_rate(self, obj) -> bool | None:
+        user = self.context.get("request").user
+        if user.is_authenticated:
+            rate = obj.comment_rates.filter(user=user).first()
+            if rate:
+                return rate.is_positive
+        return None
 
     class Meta:
         model = Comment

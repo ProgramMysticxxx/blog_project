@@ -301,8 +301,8 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @extend_schema(operation_id="favoriteComment", methods=["post"])
-    @extend_schema(operation_id="unfavoriteComment", methods=["delete"])
+    @extend_schema(operation_id="rateComment", methods=["post"])
+    @extend_schema(operation_id="unrateComment", methods=["delete"])
     @decorators.action(
         detail=True,
         methods=["post", "delete"],
@@ -314,6 +314,12 @@ class CommentViewSet(viewsets.ModelViewSet):
         if request.method == "POST":
             serializer = CommentRateSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
+            oldRate = CommentRate.objects.filter(
+                user=user,
+                comment=comment,
+            )
+            if oldRate.exists():
+                oldRate.delete()
             serializer.save(user=user, comment=comment)
             return Response({"detail": "Comment rated"})
         elif request.method == "DELETE":
