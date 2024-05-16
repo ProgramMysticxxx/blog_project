@@ -162,6 +162,11 @@ class CommentSerializer(serializers.ModelSerializer):
     #     read_only=True,
     # )
     author_details = ProfileSerializer(source="author.profile")
+    is_your_comment = serializers.SerializerMethodField()
+
+    def get_is_your_comment(self, obj) -> bool | None:
+        user = self.context.get("request").user
+        return obj.author == user
 
     class Meta:
         model = Comment
