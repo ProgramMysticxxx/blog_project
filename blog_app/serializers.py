@@ -43,6 +43,7 @@ class TagSerializer(serializers.ModelSerializer):
         model = Tag
         fields = "__all__"
 
+
 class ProfileSerializer(serializers.ModelSerializer):
     articles_count = serializers.ReadOnlyField()
     subscribers_count = serializers.ReadOnlyField()
@@ -85,6 +86,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["username"]
 
+
 class ArticleSerializer(serializers.ModelSerializer):
     rating = serializers.IntegerField(read_only=True)
     ratings_count = serializers.ReadOnlyField()
@@ -109,7 +111,10 @@ class ArticleSerializer(serializers.ModelSerializer):
     # author_public_name = serializers.ReadOnlyField(source="author.profile.public_name")
     # author_rating = serializers.ReadOnlyField(source="author.profile.rating")
     # author_subscribers_count = serializers.ReadOnlyField(source="author.profile.subscribers_count")
-    author_details = ProfileSerializer(source="author.profile")
+    author_details = ProfileSerializer(
+        source="author.profile",
+        read_only=True,
+    )
 
     your_rate = serializers.SerializerMethodField()
     you_author = serializers.SerializerMethodField()
@@ -161,7 +166,10 @@ class CommentSerializer(serializers.ModelSerializer):
     #     source="author.profile.avatar.image",
     #     read_only=True,
     # )
-    author_details = ProfileSerializer(source="author.profile")
+    author_details = ProfileSerializer(
+        source="author.profile",
+        read_only=True,
+    )
     is_your_comment = serializers.SerializerMethodField()
 
     def get_is_your_comment(self, obj) -> bool | None:
